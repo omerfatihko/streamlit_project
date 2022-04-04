@@ -16,6 +16,9 @@ st.image("ascii_tree.png", use_column_width=True)
 fastadir = join("data", "fastas")
 csvdir = join("data", "csvs")
 
+#class B1 information table
+classB1 = pd.read_csv(join(csvdir, "class_B1_all_consensus_seqs.csv"))
+
 #node initiation
 ghrhr = mf.Node("ghrhr")
 vipr1 = mf.Node("vipr1")
@@ -218,6 +221,6 @@ for node in node_selected:
                 st.write("Ancestral difference positions")
                 st.dataframe(df.loc[adp])
         st.markdown("""---""")
-        
+
 
 st.write("My program took", time.time() - start_time, "seconds to run")
