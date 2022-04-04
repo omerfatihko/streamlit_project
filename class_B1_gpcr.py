@@ -7,7 +7,7 @@ import time
 from os.path import join #isfile
 import my_functions as mf
 from typing import List #Dict
-# start_time = time.time()
+start_time = time.time()
 
 #ascii representation of class B1 family tree with node names
 st.image("ascii_tree.png", use_column_width=True)
@@ -202,7 +202,7 @@ for key in ancestrydict: #we will traverse from root to the node (follow the anc
             total_ancestral_diff.sort()
             current_node.metadata["total_ancestral_diff"] = total_ancestral_diff #assign the total ancestral difference to the metadata            
         seen.append(current_node)
-start_time = time.time()
+
 #display the selected nodes
 for node in node_selected:
     node_obj = node_dictionary[node] #get the node object
@@ -218,5 +218,6 @@ for node in node_selected:
                 st.write("Ancestral difference positions")
                 st.dataframe(df.loc[adp])
         st.markdown("""---""")
+        
 
 st.write("My program took", time.time() - start_time, "seconds to run")
