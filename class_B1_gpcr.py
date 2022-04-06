@@ -88,6 +88,8 @@ st.sidebar.markdown("""
 - **DC:** conserved for both sisters but residues are different""")
 ancestral_dif_bool = st.sidebar.checkbox(label="Ancestral difference", value=True, 
 help= "Display ancestral difference of a node (consensus positions of the current node that are different from each of its ancestor nodes")
+pymol_script_bool = st.sidebar.checkbox(label="Pymol script", value=False,
+help= "Display pymol script for selected residue types")
 
 #global variables
 consensus_limit = cons_slider/100
@@ -156,6 +158,11 @@ def new_df_diff(df1: pd.DataFrame, df2: pd.DataFrame, index_list: List) -> List:
     diff_idxs = list(sub_df1.loc[sub_df1["diff"] == "True"].index)
     return diff_idxs
 
+@st.cache
+def residue_stripper(reslist: List) -> List:
+    return_list = [x[1:] for x in reslist if x != "-"]
+    return return_list
+
 #fill the nodes with consensus data, conserved position lists
 for node in node_list:
     if mf.is_leaf(node):
@@ -213,12 +220,66 @@ for node in node_selected:
         st.write(node_obj.name.upper()) #write the name of the node
         df = node_obj.data
         st.dataframe(df.loc[df["status"].isin(attribute_selected)])
+        if pymol_script_bool:
+            if mf.is_leaf(node_obj):
+                if "C" in attribute_selected:
+                    st.markdown("**C**")
+                    col_name = node_obj.name + "_seq"
+                    rows = df["status"] == "C"
+                    residue_list = list(classB1.loc[rows, col_name].values)
+                    res_idx_list = residue_stripper(residue_list)
+                    res_idx_csl = ", ".join(res_idx_list)
+                    st.write("select " + node_obj.name + "_C, chain R and resi " + res_idx_csl)
+            if not mf.is_leaf(node_obj):
+                all_ch = mf.get_leaf_list(node_obj)
+                left_ch = mf.get_leaf_list(node_obj.left)
+                right_ch = mf.get_leaf_list(node_obj.right)
+                if "LC" in attribute_selected:
+                    st.markdown("**LC**")
+                    for ch in left_ch:
+                        col_name = ch.name + "_seq"
+                        rows = df["status"] == "LC"
+                        residue_list = list(classB1.loc[rows, col_name].values)
+                        res_idx_list = residue_stripper(residue_list)
+                        res_idx_csl = ", ".join(res_idx_list)
+                        st.write("select " + ch.name + "_" + node_obj.name + "_LC, chain R and resi " + res_idx_csl)
+                        st.write(" ")
+                if "RC" in attribute_selected:
+                    st.markdown("**RC**")
+                    for ch in right_ch:
+                        col_name = ch.name + "_seq"
+                        rows = df["status"] == "RC"
+                        residue_list = list(classB1.loc[rows, col_name].values)
+                        res_idx_list = residue_stripper(residue_list)
+                        res_idx_csl = ", ".join(res_idx_list)
+                        st.write("select " + ch.name + "_" + node_obj.name + "_RC, chain R and resi " + res_idx_csl)
+                        st.write(" ")
+                if "DI" in attribute_selected:
+                    st.markdown("**DI**")
+                    for ch in all_ch:
+                        col_name = ch.name + "_seq"
+                        rows = df["status"] == "DI"
+                        residue_list = list(classB1.loc[rows, col_name].values)
+                        res_idx_list = residue_stripper(residue_list)
+                        res_idx_csl = ", ".join(res_idx_list)
+                        st.write("select " + ch.name + "_" + node_obj.name + "_DI, chain R and resi " + res_idx_csl)
+                        st.write(" ")
+                if "DC" in attribute_selected:
+                    st.markdown("**DC**")
+                    for ch in all_ch:
+                        col_name = ch.name + "_seq"
+                        rows = df["status"] == "DC"
+                        residue_list = list(classB1.loc[rows, col_name].values)
+                        res_idx_list = residue_stripper(residue_list)
+                        res_idx_csl = ", ".join(res_idx_list)
+                        st.write("select " + ch.name + "_" + node_obj.name + "_DC, chain R and resi " + res_idx_csl)
+                        st.write(" ")
         metadata = node_obj.metadata
         if ancestral_dif_bool:
             key = "total_ancestral_diff"
             if key in metadata:
                 adp = metadata["total_ancestral_diff"]
-                st.write("Ancestral difference positions")
+                st.markdown("**Ancestral difference positions**")
                 st.dataframe(df.loc[adp])
         st.markdown("""---""")
 
